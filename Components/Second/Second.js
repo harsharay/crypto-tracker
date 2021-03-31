@@ -8,7 +8,7 @@ const Second = () => {
     const screenWidth = Dimensions.get("window").width;
 
 
-    const data = {
+    const peta = {
         labels: [],
         datasets: [
           {
@@ -34,7 +34,7 @@ const Second = () => {
     return (
         <View>
             <LineChart 
-                data={data}
+                data={peta}
                 width={screenWidth}
                 height={220}
                 chartConfig={chartConfig}
