@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native';
 import { AiFillCaretUp } from 'react-icons/ai';
 import { AiFillCaretDown } from 'react-icons/ai';
 import { LineChart } from "react-native-chart-kit"
@@ -19,7 +19,8 @@ const Home = () => {
         color: (opacity = 1) => `rgba(66, 245, 141, ${opacity})`,
         strokeWidth: 2, // optional, default 3
         barPercentage: 0.5,
-        useShadowColorFromDataset: false // optional
+        useShadowColorFromDataset: false, // optional,
+        decimalPlaces: 4,
     };
 
     useEffect(() => {
@@ -60,7 +61,7 @@ const Home = () => {
 
 
             let convertedData = tempCoinData.map(item => {
-                const { symbol, lastPrice, priceChangePercent, volume, openPrice  } = item
+                const { symbol, lastPrice, priceChangePercent, volume, openPrice, prevClosePrice  } = item
                 return {
                     symbol,
                     lastPrice : parseFloat(lastPrice).toFixed(2),
@@ -70,7 +71,7 @@ const Home = () => {
                         labels: [],
                         datasets: [
                           {
-                            data: [parseInt(lastPrice), parseInt(openPrice)],
+                            data: [parseInt(prevClosePrice), parseInt(openPrice), parseInt(lastPrice), ],
                             color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // optional
                             strokeWidth: 2 // optional
                           }
@@ -104,15 +105,6 @@ const Home = () => {
             />
             <Text style={styles.price}>${lastPrice}</Text>
             {/* <Text style={styles.otherContent}>{volume}</Text> */}
-        
-            {/* <LineChart 
-                data={data}
-                width={100}
-                height={50}
-                chartConfig={chartConfig}
-                withHorizontalLabels={false} 
-                // style={{ flexGrow:1 }}
-            /> */}
           
           
         </View>
@@ -129,13 +121,12 @@ const Home = () => {
     return (
         <View style={styles.styledView}>
             <StatusBar style="auto"/>
-            {/* <View style={styles.columnHeader}>
-                <Text>Coin</Text>
-                <Text>Price</Text>
-                <Text>24hr</Text>
-                <Text>Volume</Text>
-                <Text>Change</Text>
-            </View> */}
+            <ScrollView horizontal={true} style={styles.horizontalScrollGroup} contentContainerStyle={styles.containerStyle}>
+                <TouchableOpacity style={styles.horizontalScrollItem}>USD</TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem}>Sort by rank</TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem}>Top 50</TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem}>% (24h)</TouchableOpacity>
+            </ScrollView>
             { coinData.length > 0 && <FlatList data={topHunderdData} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> }
         </View>
     )
@@ -227,6 +218,25 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         fontSize: '24px',
         fontWeight: '700'
+    },
+
+    horizontalScrollGroup : {
+        padding: 10,
+        // width: '150%',
+    },
+
+    horizontalScrollItem : {
+        backgroundColor: '#EBEEF1',
+        padding: 10,
+        borderRadius: '20px',
+        fontWeight: 600,
+    },
+
+    containerStyle : {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     }
 })
 
