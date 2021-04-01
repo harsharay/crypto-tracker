@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native';
 import { AiFillCaretUp } from 'react-icons/ai';
 import { AiFillCaretDown } from 'react-icons/ai';
 import { LineChart } from "react-native-chart-kit"
@@ -16,7 +16,7 @@ const Home = () => {
         // backgroundGradientFromOpacity: 10,
         backgroundGradientTo: "white",
         // backgroundGradientToOpacity: 5,
-        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+        color: (opacity = 1) => `rgba(66, 245, 141, ${opacity})`,
         strokeWidth: 2, // optional, default 3
         barPercentage: 0.5,
         useShadowColorFromDataset: false // optional
@@ -85,17 +85,36 @@ const Home = () => {
 
     const Item = ({ symbol, lastPrice, index, priceChangePercent, volume, data }) => (
         <View style={styles.item}>
-          <Text style={styles.title}>{index+1}. {symbol}</Text>
-          <Text style={styles.price}>{lastPrice} $</Text>
-          <Text style={styles.price}>{priceChangePercent > 0 ? <AiFillCaretUp /> : <AiFillCaretDown />}{priceChangePercent} %</Text>
-          <Text style={styles.title}>{volume}</Text>
-          {/* {JSON.stringify(data)} */}
-          <LineChart 
+            <View style={styles.coinDetails}>
+                <Text style={styles.title}>{symbol}</Text>
+                <View style={styles.coinMetaDetails}>
+                    <Text style={[styles.coinMetaText, styles.coinMetaTextBackground]}>{index+1}</Text>
+                    <Text style={styles.coinMetaText}>{symbol}</Text>
+                    <Text style={priceChangePercent > 0 ? [styles.coinMetaText, styles.green] : [styles.coinMetaText, styles.red]}>{priceChangePercent > 0 ? <AiFillCaretUp /> : <AiFillCaretDown />}{priceChangePercent} %</Text>
+                </View>
+            </View>
+            <LineChart 
                 data={data}
                 width={100}
                 height={50}
                 chartConfig={chartConfig}
-                withHorizontalLabels={false} />
+                bezier
+                withHorizontalLabels={false} 
+                style={{ flex: 33}}
+            />
+            <Text style={styles.price}>${lastPrice}</Text>
+            {/* <Text style={styles.otherContent}>{volume}</Text> */}
+        
+            {/* <LineChart 
+                data={data}
+                width={100}
+                height={50}
+                chartConfig={chartConfig}
+                withHorizontalLabels={false} 
+                // style={{ flexGrow:1 }}
+            /> */}
+          
+          
         </View>
     );
 
@@ -109,59 +128,91 @@ const Home = () => {
 
     return (
         <View style={styles.styledView}>
-            <Text style={styles.styledText}>Welcome!</Text>
             <StatusBar style="auto"/>
-            <View style={styles.columnHeader}>
+            {/* <View style={styles.columnHeader}>
                 <Text>Coin</Text>
                 <Text>Price</Text>
                 <Text>24hr</Text>
                 <Text>Volume</Text>
                 <Text>Change</Text>
-            </View>
+            </View> */}
             { coinData.length > 0 && <FlatList data={topHunderdData} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> }
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    styledView : {
-        // flex: 1,
-        // backgroundColor: '#fff',
-        // alignItems: 'center',
-        // justifyContent: 'center',
+    coinDetails : {
+        flex: 33,
+        flexDirection: 'column',
+        width: '25%',
     },
 
-    styledText : {
+    coinMetaDetails : {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        padding: 0,
+    },  
+
+    coinMetaText : {
+        fontSize: '10px'
+    },
+
+    coinMetaTextBackground : {
+        backgroundColor: '#EBEEF1',
+        padding: 3,
+    },
+
+    green: {
+        color: '#16C784'
+    },
+
+    red: {
         color: 'red'
     },
 
     item: {
         // backgroundColor: '#f9c2ff',
         padding: 10,
-        // paddingLeft: 2,
-        marginVertical: 8,
-        marginHorizontal: 10,
+        paddingLeft: 30,
+        // marginVertical: 8,
+        // marginHorizontal: 10,
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
+        justifyContent: 'space-evenly',
+        // width: '100%',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F8F8F8'
     },
 
     title: {
-        fontSize: 13,
+        fontSize: 14,
         textAlign: 'left',
-        alignSelf: 'stretch',
+        // alignSelf: 'stretch',
         // borderWidth: 1,
-        flex: '1'
+        flex: '1',
+        marginBottom: '10px'
+    },
+
+    otherContent: {
+        fontSize: 14,
+        textAlign: 'left',
+        // alignSelf: 'stretch',
+        // borderWidth: 1,
+        flex: '33',
+        marginBottom: '10px'
     },
 
     price: {
-        fontSize: 13,
-        textAlign: 'left',
-        alignSelf: 'stretch',
-        color: '#16C784',
-        flex: '1'
+        // fontSize: 13,
+        // textAlign: 'left',
+        // alignSelf: 'stretch',
+        // color: '#16C784',
+        flex: '33',
+        marginLeft: '30px'
     },
 
     columnHeader: {
