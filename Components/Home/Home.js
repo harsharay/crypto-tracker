@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native';
-import { AiFillCaretUp } from 'react-icons/ai';
-import { AiFillCaretDown } from 'react-icons/ai';
+import { AiFillCaretUp, AiFillCaretDown, AiOutlineStar } from 'react-icons/ai';
 import { LineChart } from "react-native-chart-kit"
 
 
@@ -84,6 +83,26 @@ const Home = () => {
         }
     },[coinData])
 
+    const handleFavouriteClick = () => {
+        console.log("Favourites")
+    }
+
+    const handleUSDClick = () => {
+        console.log("USD")
+    }
+
+    const handleSortByRank = () => {
+        console.log("Sort by rank")
+    }
+
+    const handleTop50 = () => {
+        console.log("Top 50")
+    }
+
+    const handle24HourChange = () => {
+        console.log("24 hour change")
+    }
+
     const Item = ({ symbol, lastPrice, index, priceChangePercent, volume, data }) => (
         <View style={styles.item}>
             <View style={styles.coinDetails}>
@@ -104,6 +123,7 @@ const Home = () => {
                 style={{ flex: 33}}
             />
             <Text style={styles.price}>${lastPrice}</Text>
+            <AiOutlineStar />
             {/* <Text style={styles.otherContent}>{volume}</Text> */}
           
           
@@ -122,10 +142,11 @@ const Home = () => {
         <View style={styles.styledView}>
             <StatusBar style="auto"/>
             <ScrollView horizontal={true} style={styles.horizontalScrollGroup} contentContainerStyle={styles.containerStyle}>
-                <TouchableOpacity style={styles.horizontalScrollItem}>USD</TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem}>Sort by rank</TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem}>Top 50</TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem}>% (24h)</TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleFavouriteClick}><Text><AiOutlineStar /></Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleUSDClick}><Text>USD</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleSortByRank}><Text>Sort by rank</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleTop50}><Text>Top 50</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handle24HourChange}><Text>% (24h)</Text></TouchableOpacity>
             </ScrollView>
             { coinData.length > 0 && <FlatList data={topHunderdData} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> }
         </View>
@@ -168,6 +189,7 @@ const styles = StyleSheet.create({
         // backgroundColor: '#f9c2ff',
         padding: 10,
         paddingLeft: 30,
+        paddingRight: 20,
         // marginVertical: 8,
         // marginHorizontal: 10,
         flex: 1,
@@ -229,7 +251,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#EBEEF1',
         padding: 10,
         borderRadius: '20px',
-        fontWeight: 600,
     },
 
     containerStyle : {
