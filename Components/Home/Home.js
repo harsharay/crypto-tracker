@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from "react"
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native';
-import { AiFillCaretUp, AiFillCaretDown, AiOutlineStar } from 'react-icons/ai';
+import { AiFillCaretUp, AiFillCaretDown, AiOutlineStar, AiTwotoneStar } from 'react-icons/ai';
 import { LineChart } from "react-native-chart-kit"
+import { connect } from "react-redux"
 
 
-const Home = () => {
+const Home = (props) => {
 
     const [coinData, setCoinData] = useState([])
     const [topHunderdData, setTopHundredData] = useState([])
+    const [dataToDisplay, setDataToDisplay] = useState([])
+    const [bitcoinPrice, setBitcoinPrice] = useState(null)
+
+    const [favsFromStore, setFavsFromStore] = useState([])
+
+    const [showFavDataList, setShowFavDataList] = useState(false)
+    // const [favDataList, setFavDataList] = useState([])
+
+    const [currentCurrency, setCurrentCurrency] = useState(true)
 
     const chartConfig = {
         backgroundGradientFrom: "white",
@@ -21,6 +31,12 @@ const Home = () => {
         useShadowColorFromDataset: false, // optional,
         decimalPlaces: 4,
     };
+
+    useEffect(() => {
+        console.log(props.favs)
+        console.log(favsFromStore)
+        // setFavsFromStore(props.favs)
+    },[props, favsFromStore])
 
     useEffect(() => {
         fetch("https://api.binance.com/api/v3/ticker/24hr")
@@ -56,7 +72,7 @@ const Home = () => {
                     return 1
                 }
             })
-            console.log(35, tempCoinData)
+            console.log(35, tempCoinData[89])
 
 
             let convertedData = tempCoinData.map(item => {
@@ -80,16 +96,58 @@ const Home = () => {
             })
 
             setTopHundredData(convertedData.slice(0,101))
+            setDataToDisplay(convertedData.slice(0,101))
+            setBitcoinPrice(convertedData[0].lastPrice)
         }
     },[coinData])
 
-    const handleFavouriteClick = () => {
-        console.log("Favourites")
+    //Show saved data
+    const handleShowFavourites = () => {
+        setShowFavDataList(!showFavDataList)
     }
 
-    const handleUSDClick = () => {
-        console.log("USD")
+    useEffect(() => {
+        if(showFavDataList) {
+            let dataToBeInserted = []
+
+            if(favsFromStore.length > 0){
+                for(let i=0;i<favsFromStore.length;i++){
+                    dataToBeInserted.push(topHunderdData[favsFromStore[i]])
+                }
+            }
+
+            setDataToDisplay(dataToBeInserted)
+        } else {
+            setDataToDisplay(topHunderdData)
+        }
+    },[showFavDataList])
+
+
+    //Change currency
+    const handleCurrencyClick = () => {
+        setCurrentCurrency(!currentCurrency)
     }
+
+    useEffect(() => {
+        if(currentCurrency) {
+            
+            let modifiedData = [...dataToDisplay]
+
+            for(let i=0; i<dataToDisplay.length; i++){
+                modifiedData[i].lastPrice = parseFloat((modifiedData[i].lastPrice)*bitcoinPrice).toFixed(2)
+            }
+            console.log(137, modifiedData.slice(0,5))
+            setDataToDisplay(modifiedData)
+        } else {
+            console.log(139, false)
+            let modifiedData = [...dataToDisplay]
+
+            for(let i=0; i<dataToDisplay.length; i++){
+                modifiedData[i].lastPrice = parseFloat((modifiedData[i].lastPrice)/bitcoinPrice).toFixed(2)
+            }
+            setDataToDisplay(modifiedData)
+        }
+    },[currentCurrency])
 
     const handleSortByRank = () => {
         console.log("Sort by rank")
@@ -101,6 +159,41 @@ const Home = () => {
 
     const handle24HourChange = () => {
         console.log("24 hour change")
+    }
+
+    const handleAddingFavourites = index => {
+        console.log("Adding favs", index)
+        if(!favsFromStore.includes(index)) {
+            props.addFavsToStore(index)
+       
+            setFavsFromStore(prev => {
+                return [
+                    ...prev,
+                    index
+                ]
+            })
+        } 
+        // else {
+            
+        // }
+    }
+
+    const handleRemoveFavourites = index => {
+        props.removeFavsFromStore(index)
+
+        let data = [...favsFromStore]
+        let indexToBeRemoved = null
+
+        for(let i=0;i<data.length;i++){
+            if(data[i] === index) {
+                indexToBeRemoved = i
+            }
+        }
+
+        data.splice(indexToBeRemoved,1)
+
+        setFavsFromStore(data)
+        console.log(favsFromStore)
     }
 
     const Item = ({ symbol, lastPrice, index, priceChangePercent, volume, data }) => (
@@ -123,7 +216,7 @@ const Home = () => {
                 style={{ flex: 33}}
             />
             <Text style={styles.price}>${lastPrice}</Text>
-            <AiOutlineStar />
+            {favsFromStore.includes(index) ? <AiTwotoneStar onClick={() => handleRemoveFavourites(index)}/> : <AiOutlineStar onClick={() => handleAddingFavourites(index)}/>}
             {/* <Text style={styles.otherContent}>{volume}</Text> */}
           
           
@@ -142,13 +235,24 @@ const Home = () => {
         <View style={styles.styledView}>
             <StatusBar style="auto"/>
             <ScrollView horizontal={true} style={styles.horizontalScrollGroup} contentContainerStyle={styles.containerStyle}>
-                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleFavouriteClick}><Text><AiOutlineStar /></Text></TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleUSDClick}><Text>USD</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleSortByRank}><Text>Sort by rank</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleShowFavourites}><Text><AiOutlineStar /></Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleCurrencyClick}>{currentCurrency ? <Text>USD</Text> : <Text>BTC</Text>}</TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleSortByRank}><Text>Sort by price</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleTop50}><Text>Top 50</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handle24HourChange}><Text>% (24h)</Text></TouchableOpacity>
             </ScrollView>
-            { coinData.length > 0 && <FlatList data={topHunderdData} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> }
+            { dataToDisplay.length > 0 ? 
+                // (!showFavDataList) ? 
+                    <FlatList data={dataToDisplay} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> 
+                    : 
+                    <Text>No data to display</Text>
+                    // : 
+                    // (favDataList.length > 0 ? 
+                    //     <FlatList data={favDataList} renderItem={displayList} keyExtractor={(item,index) => index.toString()} />
+                    //     :
+                    //     <Text>No saved data</Text>
+                    // ) 
+            }
         </View>
     )
 }
@@ -261,4 +365,17 @@ const styles = StyleSheet.create({
     }
 })
 
-export default Home;
+const mapStateToProps = state => {
+    return {
+        favs : state.favourites
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        addFavsToStore : item => dispatch({ type: 'ADD_FAVOURITES', payload: item }),
+        removeFavsFromStore : item => dispatch({ type: 'REMOVE_FAVOURITES', payload: item })
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
