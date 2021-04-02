@@ -20,6 +20,9 @@ const Home = (props) => {
 
     const [currentCurrency, setCurrentCurrency] = useState(true)
 
+    //Sorting state
+    const [sortingOrder, setSortingOrder] = useState(true)
+
     const chartConfig = {
         backgroundGradientFrom: "white",
         // backgroundGradientFromOpacity: 10,
@@ -72,7 +75,7 @@ const Home = (props) => {
                     return 1
                 }
             })
-            console.log(35, tempCoinData[89])
+            console.log(35, tempCoinData)
 
 
             let convertedData = tempCoinData.map(item => {
@@ -129,36 +132,52 @@ const Home = (props) => {
     }
 
     useEffect(() => {
-        if(currentCurrency) {
-            
-            let modifiedData = [...dataToDisplay]
+        let modifiedData = [...dataToDisplay]
 
+        if(currentCurrency) {
             for(let i=0; i<dataToDisplay.length; i++){
                 modifiedData[i].lastPrice = parseFloat((modifiedData[i].lastPrice)*bitcoinPrice).toFixed(2)
             }
-            console.log(137, modifiedData.slice(0,5))
-            setDataToDisplay(modifiedData)
+            
         } else {
-            console.log(139, false)
-            let modifiedData = [...dataToDisplay]
-
             for(let i=0; i<dataToDisplay.length; i++){
                 modifiedData[i].lastPrice = parseFloat((modifiedData[i].lastPrice)/bitcoinPrice).toFixed(2)
             }
-            setDataToDisplay(modifiedData)
         }
+
+        setDataToDisplay(modifiedData)
     },[currentCurrency])
 
-    const handleSortByRank = () => {
-        console.log("Sort by rank")
+
+    //Sorting
+    const handleSortByPrice = () => {
+        setSortingOrder(!sortingOrder)
     }
+
+    useEffect(() => {
+        if(sortingOrder) {
+            let sortedData = dataToDisplay.sort((a,b) => {
+                if(parseFloat(a.lastPrice) < parseFloat(b.lastPrice)){
+                    return -1
+                }
+            })
+            setDataToDisplay(sortedData)
+        } else {
+            let sortedData = dataToDisplay.sort((a,b) => {
+                if(parseFloat(a.lastPrice) > parseFloat(b.lastPrice)){
+                    return -1
+                }
+            })
+            setDataToDisplay(sortedData)
+        }
+    },[sortingOrder])
 
     const handleTop50 = () => {
-        console.log("Top 50")
-    }
+        let modifiedData = [...dataToDisplay]
 
-    const handle24HourChange = () => {
-        console.log("24 hour change")
+        modifiedData = modifiedData.slice(0,51)
+
+        setDataToDisplay(modifiedData)
     }
 
     const handleAddingFavourites = index => {
@@ -173,9 +192,6 @@ const Home = (props) => {
                 ]
             })
         } 
-        // else {
-            
-        // }
     }
 
     const handleRemoveFavourites = index => {
@@ -237,9 +253,8 @@ const Home = (props) => {
             <ScrollView horizontal={true} style={styles.horizontalScrollGroup} contentContainerStyle={styles.containerStyle}>
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleShowFavourites}><Text><AiOutlineStar /></Text></TouchableOpacity>
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleCurrencyClick}>{currentCurrency ? <Text>USD</Text> : <Text>BTC</Text>}</TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleSortByRank}><Text>Sort by price</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleSortByPrice}><Text>Sort by price</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleTop50}><Text>Top 50</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.horizontalScrollItem} onPress={handle24HourChange}><Text>% (24h)</Text></TouchableOpacity>
             </ScrollView>
             { dataToDisplay.length > 0 ? 
                 // (!showFavDataList) ? 
