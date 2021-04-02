@@ -16,7 +16,6 @@ const Home = (props) => {
     const [favsFromStore, setFavsFromStore] = useState([])
 
     const [showFavDataList, setShowFavDataList] = useState(false)
-    // const [favDataList, setFavDataList] = useState([])
 
     const [currentCurrency, setCurrentCurrency] = useState(true)
 
@@ -38,7 +37,6 @@ const Home = (props) => {
     useEffect(() => {
         console.log(props.favs)
         console.log(favsFromStore)
-        // setFavsFromStore(props.favs)
     },[props, favsFromStore])
 
     useEffect(() => {
@@ -46,7 +44,6 @@ const Home = (props) => {
         .then(data => data.json())
         .then(json => {
             setCoinData(json)
-            console.log(json)
         })
     },[])
 
@@ -75,8 +72,6 @@ const Home = (props) => {
                     return 1
                 }
             })
-            console.log(35, tempCoinData)
-
 
             let convertedData = tempCoinData.map(item => {
                 const { symbol, lastPrice, priceChangePercent, volume, openPrice, prevClosePrice  } = item
@@ -233,7 +228,6 @@ const Home = (props) => {
             />
             <Text style={styles.price}>${lastPrice}</Text>
             {favsFromStore.includes(index) ? <AiTwotoneStar onClick={() => handleRemoveFavourites(index)}/> : <AiOutlineStar onClick={() => handleAddingFavourites(index)}/>}
-            {/* <Text style={styles.otherContent}>{volume}</Text> */}
           
           
         </View>
@@ -257,16 +251,10 @@ const Home = (props) => {
                 <TouchableOpacity style={styles.horizontalScrollItem} onPress={handleTop50}><Text>Top 50</Text></TouchableOpacity>
             </ScrollView>
             { dataToDisplay.length > 0 ? 
-                // (!showFavDataList) ? 
                     <FlatList data={dataToDisplay} renderItem={displayList} keyExtractor={(item,index) => index.toString()} /> 
                     : 
                     <Text>No data to display</Text>
-                    // : 
-                    // (favDataList.length > 0 ? 
-                    //     <FlatList data={favDataList} renderItem={displayList} keyExtractor={(item,index) => index.toString()} />
-                    //     :
-                    //     <Text>No saved data</Text>
-                    // ) 
+                   
             }
         </View>
     )
